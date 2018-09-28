@@ -8,12 +8,12 @@ from musics.models import Music
 
 
 class MusicViewTestCase(APITestCase):
-    url_reverse = reverse('api:music-list')
-    url = '/api/music/'
-    url_detail = '/api/music/{}/'
-    url_detail_route_reverse = reverse('api:music-detail', kwargs={"pk": 1})
-    url_detail_route = '/api/music/{}/detail/'
-    url_list_route = '/api/music/all_singer/'
+    url_reverse = reverse('app:music-list')
+    url = '/app/music/'
+    url_detail = '/app/music/{}/'
+    url_detail_route_reverse = reverse('app:music-detail', kwargs={"pk": 1})
+    url_detail_route = '/app/music/{}/detail/'
+    url_list_route = '/app/music/all_singer/'
 
     def setUp(self):
         print('setUp')

@@ -2,42 +2,44 @@ version: '3'
 services:
 
     db:
-      container_name: postgres
+      container_name: "postgres"
       image: postgres
       environment:
-        POSTGRES_PASSWORD: password123
+        POSTGRES_USER: $DJANGO_DB_USER
+        POSTGRES_PASSWORD: $DJANGO_DB_PASSWORD
+        POSTGRES_DB: $DJANGO_DB_NAME
       ports:
         - "5432:5432"
-        # (HOST:CONTAINER)
       volumes:
         - pgdata:/var/lib/postgresql/data/
 
     nginx:
-        container_name: nginx-container        
+        container_name: "nginx"
         build: ./nginx
         restart: always
+        environment:
+          #- NGINX_HOST
+          - NGINX_PORT=80
         ports:
-        - "8080:80" 
+          - "80:80"
         volumes:        
-        - api_data:/docker_api        
-        - ./log:/var/log/nginx              
+          - app_data:/docker_app
+          - ./log:/var/log/nginx
         depends_on:
-        - api
+          - app
         
-    api:
-        container_name: api-container
-        build: ./api        
+    app:
+        container_name: "app"
+        build: ./app
         restart: always
-        # command: uwsgi  --emperor uwsgi.ini         
-        command: uwsgi --ini uwsgi.ini         
-        ports:
-        - "8002:8000"
+        #command: uwsgi  --emperor uwsgi.ini
+        command: uwsgi --ini uwsgi.ini
         volumes:
-        - api_data:/docker_api        
+          - app_data:/docker_app
         depends_on:
-        - db
+          - db
 
 volumes:
-    api_data:
+    app_data:
     pgdata:
 

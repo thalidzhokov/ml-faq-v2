@@ -23,6 +23,6 @@ router.register(r'music', views.MusicViewSet, base_name='music')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^api/', include(router.urls, namespace='api'), name='api'),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^app/', include(router.urls, namespace='app'), name='app'),
+    url(r'^app-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]

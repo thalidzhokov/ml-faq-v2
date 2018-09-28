@@ -17,7 +17,7 @@ class MusicViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     parser_classes = (JSONParser,)
 
-    # /api/music/{pk}/detail/
+    # /app/music/{pk}/detail/
     @detail_route(methods=['get'])
     def detail(self, request, pk=None):
         music = get_object_or_404(Music, pk=pk)
@@ -28,7 +28,7 @@ class MusicViewSet(viewsets.ModelViewSet):
 
         return Response(result, status=status.HTTP_200_OK)
 
-    # /api/music/all_singer/
+    # /app/music/all_singer/
     @list_route(methods=['get'])
     def all_singer(self, request):
         music = Music.objects.values_list('singer', flat=True).distinct()

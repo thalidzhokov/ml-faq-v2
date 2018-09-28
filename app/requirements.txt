@@ -1,0 +1,7 @@
+django<2.1
+django-import-export
+django-debug-toolbar
+djangorestframework
+pytz
+psycopg2
+uwsgi
