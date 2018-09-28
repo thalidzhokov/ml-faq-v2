@@ -99,3 +99,8 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Other
+!.idea/vcs.xml
+.idea
+.DS_Store
