@@ -1,5 +1,7 @@
-FROM python:3.6.2
-LABEL maintainer twtrubiks
+FROM python:3
+
+LABEL maintainer="Albert Thalidzhokov <thalidzhokov@gmail.com>"
+
 ENV PYTHONUNBUFFERED 1
 RUN mkdir /docker_api
 WORKDIR /docker_api
