@@ -15,7 +15,7 @@ services:
 
     nginx:
         container_name: "nginx"
-        build: ./nginx
+        image: nginx
         restart: always
         environment:
           #- NGINX_HOST
@@ -24,7 +24,7 @@ services:
           - "80:80"
         volumes:        
           - docker_app:/docker_app
-          - ./log:/var/log/nginx
+          - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
         depends_on:
           - app
         
@@ -32,10 +32,10 @@ services:
         container_name: "app"
         build: ./app
         restart: always
-        #command: uwsgi  --emperor uwsgi.ini
         command: uwsgi --ini uwsgi.ini
         volumes:
           - docker_app:/docker_app
+          - ./app:/docker_app
         depends_on:
           - db
 
