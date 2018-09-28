@@ -23,7 +23,7 @@ services:
         ports:
           - "80:80"
         volumes:        
-          - app_data:/docker_app
+          - docker_app:/docker_app
           - ./log:/var/log/nginx
         depends_on:
           - app
@@ -35,11 +35,11 @@ services:
         #command: uwsgi  --emperor uwsgi.ini
         command: uwsgi --ini uwsgi.ini
         volumes:
-          - app_data:/docker_app
+          - docker_app:/docker_app
         depends_on:
           - db
 
 volumes:
-    app_data:
+    docker_app:
     pgdata:
 
