@@ -1,7 +1,9 @@
 django<2.1
 django-import-export
 django-debug-toolbar
+django-filebrowser
 djangorestframework
+filebrowser
 pytz
 psycopg2-binary
 uwsgi
@@ -9,7 +11,7 @@ spacy
 pandas
 pymystem3
 pillow
-django-filebrowser
+
 
 # For spacy
 # wget https://s3-us-west-1.amazonaws.com/fasttext-vectors/word-vectors-v2/cc.la.300.vec.gz
