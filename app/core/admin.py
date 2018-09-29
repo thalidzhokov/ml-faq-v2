@@ -5,7 +5,7 @@ from import_export import widgets, fields, resources
 from import_export.admin import ImportExportModelAdmin #for downloading csv-file
 from import_export.admin import ImportExportActionModelAdmin #to chose a file format
 from core.models import Faq
-from core.utils import print_result
+#from core.utils import print_result
 
 admin.site.site_header = 'Автофакер'
 
@@ -29,7 +29,7 @@ class FaqAdmin(ImportExportModelAdmin):
             a = request.GET.get("q", '')
 
             print(queryset)
-            print(print_result(a))
+            #print(print_result(a))
 
             return queryset, use_distinct
 
