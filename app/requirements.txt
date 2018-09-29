@@ -3,5 +3,5 @@ django-import-export
 django-debug-toolbar
 djangorestframework
 pytz
-psycopg2
+psycopg2-binary
 uwsgi
