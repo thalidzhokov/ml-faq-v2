@@ -29,7 +29,7 @@ class FaqAdmin(ImportExportModelAdmin):
             a = request.GET.get("q", '')
 
             print(queryset)
-            #print(print_result(a))
+            print(print_result(a))
 
             return queryset, use_distinct
 
