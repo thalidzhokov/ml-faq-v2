@@ -12,6 +12,8 @@ services:
         - "5432:5432"
       volumes:
         - pgdata:/var/lib/postgresql/data/
+        - ./postgres/dump:/dump
+        - ./postgres/init:/init
 
     nginx:
         container_name: "nginx"
@@ -40,6 +42,5 @@ services:
           - db
 
 volumes:
-    docker_app:
     pgdata:
 

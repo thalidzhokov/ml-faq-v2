@@ -3,7 +3,7 @@ django-import-export
 django-debug-toolbar
 django-filebrowser
 djangorestframework
-filebrowser
+pymorphy2
 pytz
 psycopg2-binary
 uwsgi
@@ -11,8 +11,3 @@ spacy
 pandas
 pymystem3
 pillow
-
-
-# For spacy
-# wget https://s3-us-west-1.amazonaws.com/fasttext-vectors/word-vectors-v2/cc.la.300.vec.gz
-# python -m spacy init-model en /tmp/la_vectors_wiki_lg --vectors-loc cc.la.300.vec.gz
