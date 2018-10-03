@@ -52,10 +52,10 @@ def clean_text(text):
 
 
 # load data
-df = pd.read_csv('dataset.csv', usecols=['id', 'question', 'answer', 'title'])
+df = pd.read_csv('../dataset.csv', usecols=['id', 'question', 'answer', 'title'])
 dataset = df.to_dict(orient='records')
 
-data = open('dataset.csv')
+data = open('../dataset.csv')
 questions_answers_dict = {x[1]: x[2] for x in csv.reader(data, delimiter=',', quotechar='"')}
 
 # arr = list(faqs.keys())
