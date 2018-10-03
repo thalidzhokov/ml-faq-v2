@@ -101,4 +101,6 @@ ENV/
 !.idea/vcs.xml
 .idea
 .DS_Store
+
+# App
 app/app.sock
