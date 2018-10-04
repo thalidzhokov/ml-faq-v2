@@ -37,7 +37,7 @@ services:
         restart: always
         command: uwsgi --ini uwsgi.ini
         environment:
-          SECRET_KEY: $SECRET_KEY
+          APP_SECRET_KEY: $SECRET_KEY
           POSTGRES_HOST: $POSTGRES_HOST
           POSTGRES_PORT: $POSTGRES_PORT
           POSTGRES_USER: $POSTGRES_USER
