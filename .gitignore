@@ -104,3 +104,4 @@ ENV/
 
 # App
 app/app.sock
+app/static
