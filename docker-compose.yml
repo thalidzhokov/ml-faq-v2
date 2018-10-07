@@ -48,7 +48,7 @@ services:
             POSTGRES_USER: $POSTGRES_USER
             POSTGRES_PASSWORD: $POSTGRES_PASSWORD
         restart: always
-        command: uwsgi --ini uwsgi.ini
+        #command: uwsgi --ini uwsgi.ini
         volumes:
           - appdata:/app
           - ./app/config:/app/config
