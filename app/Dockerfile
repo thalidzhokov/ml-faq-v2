@@ -22,13 +22,14 @@ ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
 ENV PYTHONUNBUFFERED 1
 
-RUN mkdir /docker_app
-WORKDIR /docker_app
-COPY . /docker_app
+RUN mkdir /app
+WORKDIR /app
+COPY . /app
 RUN pip install -r requirements.txt
 # RUN pip install  -i  https://pypi.python.org/simple/  -r requirements.txt
 
 RUN python manage.py collectstatic
+#RUN python manage.py makemigrations
 
 # Spacy
 # Fasttext vectors https://fasttext.cc/docs/en/crawl-vectors.html

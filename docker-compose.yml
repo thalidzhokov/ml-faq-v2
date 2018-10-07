@@ -24,8 +24,9 @@ services:
           - NGINX_PORT=80
         ports:
           - "80:80"
-        volumes:        
-          - ./app:/docker_app
+        volumes:
+          - appdata:/app
+          - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
           - ./nginx/nginx.conf:/etc/nginx/nginx.conf
           - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
         depends_on:
@@ -33,21 +34,29 @@ services:
         
     app:
         container_name: "app"
-        build: ./app
+        build:
+          context: ./app
+          dockerfile: Dockerfile
+          args:
+            APP_SECRET_KEY: $APP_SECRET_KEY
+            POSTGRES_HOST: $POSTGRES_HOST
+            POSTGRES_PORT: $POSTGRES_PORT
+            POSTGRES_DB: $POSTGRES_DB
+            POSTGRES_USER: $POSTGRES_USER
+            POSTGRES_PASSWORD: $POSTGRES_PASSWORD
         restart: always
         command: uwsgi --ini uwsgi.ini
-        environment:
-          APP_SECRET_KEY: $APP_SECRET_KEY
-          POSTGRES_HOST: $POSTGRES_HOST
-          POSTGRES_PORT: $POSTGRES_PORT
-          POSTGRES_DB: $POSTGRES_DB
-          POSTGRES_USER: $POSTGRES_USER
-          POSTGRES_PASSWORD: $POSTGRES_PASSWORD
         volumes:
-          - ./app:/docker_app
+          - appdata:/app
+          - ./app/config:/app/config
+          - ./app/core:/app/core
+          - ./app/manage.py:/app/manage.py
+          - ./app/requirements.txt:/app/requirements.txt
+          - ./app/uwsgi.ini:/app/uwsgi.ini
         depends_on:
           - db
 
 volumes:
+    appdata:
     pgdata:
 
