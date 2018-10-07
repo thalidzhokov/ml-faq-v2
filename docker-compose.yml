@@ -39,6 +39,9 @@ services:
           dockerfile: Dockerfile
           args:
             APP_SECRET_KEY: $APP_SECRET_KEY
+            APP_USER: $APP_USER
+            APP_USER_EMAIL: $APP_USER_EMAIL
+            APP_USER_PASSWORD: $APP_USER_PASSWORD
             POSTGRES_HOST: $POSTGRES_HOST
             POSTGRES_PORT: $POSTGRES_PORT
             POSTGRES_DB: $POSTGRES_DB

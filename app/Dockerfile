@@ -5,6 +5,15 @@ LABEL maintainer="Albert Thalidzhokov <thalidzhokov@gmail.com>"
 ARG APP_SECRET_KEY
 ENV APP_SECRET_KEY=${APP_SECRET_KEY}
 
+ARG APP_USER
+ENV APP_USER=${APP_USER}
+
+ARG APP_USER_EMAIL
+ENV APP_USER_EMAIL=${APP_USER_EMAIL}
+
+ARG APP_USER_PASSWORD
+ENV APP_USER_PASSWORD=${APP_USER_PASSWORD}
+
 ARG POSTGRES_HOST
 ENV POSTGRES_HOST=${POSTGRES_HOST}
 
@@ -29,7 +38,8 @@ RUN pip install -r requirements.txt
 # RUN pip install  -i  https://pypi.python.org/simple/  -r requirements.txt
 
 RUN python manage.py collectstatic
-#RUN python manage.py makemigrations
+#RUN python manage.py migrate
+#RUN echo "from django.contrib.auth.models import User; User.objects.create_superuser(${APP_USER}, ${APP_USER_EMAIL}, ${APP_USER_PASSWORD})" | ./manage.py shell
 
 # Spacy
 # Fasttext vectors https://fasttext.cc/docs/en/crawl-vectors.html
