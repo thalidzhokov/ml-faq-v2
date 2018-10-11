@@ -21,7 +21,7 @@ class FAQ(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(primary_key=True, default=uuid.uuid4, help_text='Идентификатор вопроса')),
                 ('question', models.TextField(blank=True, help_text='Вопрос', null=True)),
-                ('answer_id', models.ForeignKey('Answer', on_delete=models.SET_NULL, null=True, help_text='Ответ')),
+                ('answer_id', models.ForeignKey('Answer', on_delete=models.SET_NULL, null=True, help_text='Идентификатор ответа')),
             ],
         ),
     ]
