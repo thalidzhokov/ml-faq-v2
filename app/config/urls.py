@@ -20,5 +20,4 @@ from filebrowser.sites import site
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('admin/filebrowser/', site.urls, name='filebrowser'),
-    path('grappelli/', include('grappelli.urls'), name='grappelli'),
 ]

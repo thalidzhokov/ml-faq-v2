@@ -52,7 +52,7 @@ services:
         volumes:
           - appdata:/app
           - ./app/config:/app/config
-          - ./app/core:/app/core
+          - ./app/faq:/app/faq
           - ./app/manage.py:/app/manage.py
           - ./app/requirements.txt:/app/requirements.txt
           - ./app/uwsgi.ini:/app/uwsgi.ini
