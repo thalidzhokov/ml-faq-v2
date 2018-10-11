@@ -10,4 +10,4 @@ class Answer(models.Model):
 class Question(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, help_text='Идентификатор вопроса')
     question = models.TextField(blank=True, help_text='Вопрос', null=True)
-    answer_id = models.ForeignKey('Answer', on_delete=models.SET_NULL, null=True)
+    answer_id = models.ForeignKey('Answer', on_delete=models.SET_NULL, null=True, help_text='Ответ')

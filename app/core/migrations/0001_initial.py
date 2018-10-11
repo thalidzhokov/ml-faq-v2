@@ -9,14 +9,14 @@ class FAQ(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Answers',
+            name='Answer',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('answer', models.TextField(blank=True, help_text='Ответ', null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Questions',
+            name='Question',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('question', models.TextField(blank=True, help_text='Вопрос', null=True)),
