@@ -1,7 +1,7 @@
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+class FAQ(migrations.Migration):
 
     initial = True
 
@@ -9,12 +9,18 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Faq',
+            name='Answers',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('question', models.TextField(blank=True, help_text='Вопрос из датасета.', null=True)),
-                ('answer', models.TextField(blank=True, help_text='Ответ из датасета.', null=True)),
-                ('title', models.TextField(blank=True, help_text='Заголовок вопроса из датасета.', null=True)),
+                ('answer', models.TextField(blank=True, help_text='Ответ', null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Questions',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('question', models.TextField(blank=True, help_text='Вопрос', null=True)),
+                #('answer_id', models.ForeignKey()), <<<<<<<<<<<<<<<<<<
             ],
         ),
     ]
