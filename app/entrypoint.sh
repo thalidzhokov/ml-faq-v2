@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ ! -f entrypoint.lock ]; then
+if [ ! -f "entrypoint.lock" ]; then
 
     python manage.py collectstatic
     python manage.py migrate

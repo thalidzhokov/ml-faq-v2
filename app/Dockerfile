@@ -31,20 +31,26 @@ ENV POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
 ENV PYTHONUNBUFFERED 1
 
+
+# Install requirements
 RUN mkdir /app
 WORKDIR /app
 COPY . /app
 RUN pip install -r requirements.txt
 # RUN pip install  -i  https://pypi.python.org/simple/  -r requirements.txt
 
+
 # Spacy
 # Fasttext vectors https://fasttext.cc/docs/en/crawl-vectors.html
-RUN mkdir -p /fasttext-vectors/word-vectors-v2
-RUN wget https://s3-us-west-1.amazonaws.com/fasttext-vectors/word-vectors-v2/cc.ru.300.vec.gz -O /tmp/cc.ru.300.vec.gz
-RUN python -m spacy init-model ru /fasttext-vectors/word-vectors-v2 --vectors-loc /tmp/cc.ru.300.vec.gz
+RUN if [ ! -f "uploads/cc.ru.300.vec.gz" ]; then wget https://s3-us-west-1.amazonaws.com/fasttext-vectors/word-vectors-v2/cc.ru.300.vec.gz -O uploads/cc.ru.300.vec.gz; fi
 
+# Inint model
+RUN mkdir -p /tmp/fasttext-vectors/word-vectors-v2
+RUN python -m spacy init-model ru /tmp/fasttext-vectors/word-vectors-v2 --vectors-loc uploads/cc.ru.300.vec.gz
+
+
+# Entrypoint
 RUN chmod +x entrypoint.sh
-
 CMD ["/bin/bash", "entrypoint.sh"]
 
 EXPOSE 3031
