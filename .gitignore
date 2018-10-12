@@ -105,4 +105,4 @@ ENV/
 # App
 app/app.sock
 app/static
-tmp
+app/entrypoint.lock
