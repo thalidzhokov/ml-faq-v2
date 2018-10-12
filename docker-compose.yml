@@ -65,5 +65,10 @@ services:
 
 volumes:
     appdata:
+      driver: local
+      driver_opts:
+        type: none
+        device: ${PWD}/app
+        o: bind
     pgdata:
 
