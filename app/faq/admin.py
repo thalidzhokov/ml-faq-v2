@@ -11,7 +11,7 @@ admin.site.site_header = 'FAQ'
 
 
 class AnswerAdmin(admin.ModelAdmin):
-    fields = ["id", "answer"]
+    fields = ["answer"]
     search_fields = ["id", "answer"]
 
     class Meta:
@@ -22,7 +22,7 @@ admin.site.register(Answer, AnswerAdmin)
 
 
 class QuestionAdmin(admin.ModelAdmin):
-    fields = ["id", "question", "answer_id"]
+    fields = ["question", "answer_id"]
     search_fields = ["id", "question", "answer_id"]
 
     class Meta:
