@@ -10,23 +10,19 @@ from .models import Answer, Question
 admin.site.site_header = 'FAQ'
 
 
-class AnswerAdmin(admin.ModelAdmin):
-    fields = ["answer"]
-    search_fields = ["id", "answer"]
+class AnswerAdmin(ImportExportModelAdmin):
 
     class Meta:
         model = Answer
+        fields = ['answer',]
 
 
-admin.site.register(Answer, AnswerAdmin)
-
-
-class QuestionAdmin(admin.ModelAdmin):
-    fields = ["question", "answer_id"]
-    search_fields = ["id", "question", "answer_id"]
+class QuestionAdmin(ImportExportModelAdmin):
 
     class Meta:
         model = Question
+        fields = ['question', 'answer_id',]
 
 
 admin.site.register(Question, QuestionAdmin)
+admin.site.register(Answer, AnswerAdmin)
