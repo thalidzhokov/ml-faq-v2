@@ -14,15 +14,19 @@ class AnswerAdmin(ImportExportModelAdmin):
 
     class Meta:
         model = Answer
-        fields = ['answer',]
+        fields = ['answer']
+        search_fields = ["id", "answer"]
+
+
+admin.site.register(Answer, AnswerAdmin)
 
 
 class QuestionAdmin(ImportExportModelAdmin):
 
     class Meta:
         model = Question
-        fields = ['question', 'answer_id',]
+        fields = ['question', 'answer_id']
+        search_fields = ["id", "question", "answer_id"]
 
 
 admin.site.register(Question, QuestionAdmin)
-admin.site.register(Answer, AnswerAdmin)
