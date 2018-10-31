@@ -106,3 +106,4 @@ ENV/
 app/app.sock
 app/static
 app/entrypoint.lock
+app/faq/migrations
