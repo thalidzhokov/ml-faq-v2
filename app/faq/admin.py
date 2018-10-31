@@ -13,6 +13,7 @@ admin.site.site_header = 'FAQ'
 class AnswerAdmin(ImportExportModelAdmin):
     fields = ['answer']
     search_fields = ['id', 'answer']
+    list_display = ['id', 'answer']
 
     class Meta:
         model = Answer
@@ -24,6 +25,7 @@ admin.site.register(Answer, AnswerAdmin)
 class QuestionAdmin(ImportExportModelAdmin):
     fields = ['question', 'answer_id']
     search_fields = ['id', 'question', 'answer_id']
+    list_display = ['id', 'question', 'answer_id']
 
     class Meta:
         model = Question
