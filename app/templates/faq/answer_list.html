@@ -1,0 +1,45 @@
+{% extends 'faq/base.html' %}
+
+{% block title %}FAQ{% endblock %}
+
+{% block content %}
+
+<form action="http://127.0.0.1:8001/faq/" method="get">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
+<br><br>
+    <h2>KNN</h2> {{ knn }}
+    <h2>{{ test }}</h2>
+<form action="http://127.0.0.1:8001/vote_knn/" method="get">
+    {% csrf_token %}
+    <input type="submit" value="Vote KNN">
+    <!--onclick="this.disabled=true;" чтобы кнопка не нажималась второй раз-->
+</form>
+
+<hr><br>
+    <h2>Random Forest</h2> {{ rf }}
+    <h2>{{ random_forest }}</h2>
+<form action="http://127.0.0.1:8001/vote_random_forest/" method="get">
+    {% csrf_token %}
+    <input type="submit" value="Vote Random Forest">
+</form>
+<hr><br>
+    <h2>Cosine Distance</h2> {{ cd }}
+    <h2>{{ random_forest }}</h2>
+<form action="http://127.0.0.1:8001/vote_cosine_distance/" method="get">
+    {% csrf_token %}
+    <input type="submit" value="Vote Cosine Distance">
+</form>
+<hr><br>
+
+
+{% endblock %}
+
+
+    <!--<ol>-->
+        <!--{% for answer in object_list %}-->
+            <!--<li>{{ answer.answer }}</li>-->
+        <!--{% endfor %}-->
+    <!--</ol>-->

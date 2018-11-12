@@ -2,77 +2,180 @@
 # -*- coding: utf8 -*-
 
 # imports
-import spacy
-import csv
 import pandas as pd
-from pymystem3 import Mystem
+import numpy as np
+import pickle
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from string import punctuation
+from pymorphy2 import MorphAnalyzer
+from collections import Counter
+from sklearn.metrics.pairwise import cosine_distances
 
-# spacy.load
-nlp = spacy.load('/fasttext-vectors/word-vectors-v2')
+morph = MorphAnalyzer()
+stops = stopwords.words('russian')
+punct = punctuation+'«»—…“”*№–'
 
-# preprocessing
-mystem = Mystem()
+#load pretrained model
+from gensim.models import KeyedVectors
+# ft = KeyedVectors.load_word2vec_format(('cc.ru.300.vec'), binary=False)
 
-RUSSIAN_STOPWORDS = ['и', 'в', 'во', 'не', 'что', 'он', 'на', 'я', 'с', 'со', 'что-то',
-                     'как', 'а', 'то', 'все', 'она', 'так', 'его', 'но', 'да', 'ты', 'к', 'у', 'же',
-                     'вы', 'за', 'бы', 'по', 'только', 'ее', 'мне', 'было', 'вот', 'от', 'меня', 'еще',
-                     'нет', 'о', 'из', 'ему', 'теперь', 'когда', 'даже', 'ну', 'вдруг', 'ли', 'если',
-                     'уже', 'или', 'ни', 'быть', 'был', 'него', 'до', 'вас', 'нибудь', 'опять', 'уж',
-                     'вам', 'ведь', 'там', 'потом', 'себя', 'ничего', 'ей', 'может', 'они', 'тут',
-                     'где', 'есть', 'надо', 'ней', 'для', 'мы', 'тебя', 'их', 'чем', 'была', 'сам',
-                     'чтоб', 'без', 'будто', 'чего', 'раз', 'тоже', 'себе', 'под', 'будет', 'ж',
-                     'тогда', 'кто', 'этот', 'того', 'потому', 'этого', 'какой', 'совсем', 'ним',
-                     'здесь', 'этом', 'один', 'почти', 'мой', 'тем', 'чтобы', 'нее', 'сейчас', 'были',
-                     'куда', 'зачем', 'всех', 'никогда', 'можно', 'при', 'наконец', 'два', 'об', 'другой',
-                     'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти', 'нас', 'про', 'всего', 'них',
-                     'какая', 'много', 'разве', 'три', 'эту', 'моя', 'впрочем', 'хорошо', 'свою', 'этой',
-                     'перед', 'иногда', 'лучше', 'чуть', 'том', 'нельзя', 'такой', 'им', 'более', 'всегда',
-                     'конечно', 'всю', 'между', 'почему', 'мочь', 'хотеть', 'какие', 'как', 'привет',
-                     'здравствуйте', 'приветствую', 'сделать', 'узнавать', 'что-нибудь', 'пожалуйста',
-                     'допустим'
-                     ]
+def normalize(text):
+    # words = [word.strip(punct) for word in text.lower().split()]
+    words = [word.strip(punct) for word in word_tokenize(text.lower())]
+    words = [morph.parse(word)[0].normal_form for word in words]
+    words = [word for word in words if word not in stops]
+    return ' '.join(words)
 
-TRASH = [' ', ',', ', ', ' ?', '? ', '-', '.', '. ', ')', '(', ' (', ') ', '«', '»', ' «', '» ', '!', '?', '\n']
+data = pd.read_csv('df_all_class_labels.csv', sep='\t')
 
+data['texts_norm'] = data['texts'].apply(lambda x: normalize(x))
 
-def lemmatize(text):
-    lemmas_with_spaces = mystem.lemmatize(text)
-    return lemmas_with_spaces
+#model_1 SVD+Random Forest
+filename = 'ft_vec_SVD_RandForest.sav'
+loaded_model_RF = pickle.load(open(filename, 'rb'))
 
-
-def remove_stop_words(lemmas):
-    return [w for w in lemmas if not w in RUSSIAN_STOPWORDS]
+#model_2 SVD+KNN
+filename = 'ft_vec_SVD_KNN.sav'
+loaded_model_KNN = pickle.load(open(filename, 'rb'))
 
 
-def clean_text(text):
-    res = text[:]
-    for word in text:
-        if word in TRASH:
-            res.remove(word)
-    return res
+# функция для поиска векторов в предобученных векторах Fasttext
+def getWordVecs(text, dim):
+    text = text.split()
+    # чтобы не доставать одно слово несколько раз
+    # сделаем счетчик, а потом векторы домножим на частоту
+    words = Counter(text)
+    total = len(text)
+    vectors = np.zeros((len(words), dim))
+    for i, word in enumerate(words):
+        try:
+            v = ft[word]
+            vectors[i] = v * (words[word] / total)  # просто умножаем вектор на частоту
+        except (KeyError, ValueError):
+            continue
+
+    if vectors.any():  # усредняем векторы
+        vector = np.average(vectors, axis=0)
+    else:
+        vector = np.zeros((dim))
+
+    return vector
 
 
-# load data
-df = pd.read_csv('../dataset.csv', usecols=['id', 'question', 'answer', 'title'])
-dataset = df.to_dict(orient='records')
+def predict_question_rf(question):
+    prep = normalize(question)
+    dim = 300
+    vects_docs_prep = np.zeros((len(prep), dim))
+    predicted_1 = loaded_model_RF.predict(vects_docs_prep)
 
-data = open('../dataset.csv')
-questions_answers_dict = {x[1]: x[2] for x in csv.reader(data, delimiter=',', quotechar='"')}
+    for doc, category in zip(question, predicted_1):
+        clas = int(data.labels[category])
+        df = data['answers'].loc[data['labels'] == clas]
+        return df.iloc[0]
 
-# arr = list(faqs.keys())
-questions = list(questions_answers_dict.keys())
+# index.valueshttps://brlhq.slack.com/archives/GB6RNKYUD/p1541757643006100
+
+def predict_question_knn(question):
+    prep = normalize(question)
+    dim = 300
+    vects_docs_prep = np.zeros((len(prep), dim))
+    predicted_2 = loaded_model_KNN.predict(vects_docs_prep)
+
+    for doc, category in zip(question, predicted_2):
+        clas = int(data.labels[category])
+        df = data['answers'].loc[data['labels'] == clas]
+        return df.iloc[0]
+
+##########
+#
+# cos_dist = cosine_distances(vects_docs_prep, vects_ft).argsort()
+#
+# for doc, category in zip(docs_new, cos_dist):
+#     clas = int(data.labels[category[0]])
+#     df = data['answers'].loc[data['labels'] == clas]
+#     print('{} => {}'.format(doc, df.iloc[0]))
+#
+# ##########
 
 
-# print(questions)
-
-def print_result(question):
-    # global top5_answers
-    question = nlp(' '.join(clean_text(remove_stop_words(lemmatize(question)))))
-    for_sort = []
-    for i in questions:
-        for_sort.append((question.similarity(nlp(' '.join(clean_text(remove_stop_words(lemmatize(i)))))), nlp(i).text))
-    return sorted(for_sort, key=lambda tup: tup[0], reverse=True)[0:5]
+def getWordVecs_():
 
 
-def append_new_vector(question_append, question):
-    questions[int(question_append)] + ' ' + str(question)
+    a = np.array([ 2.02280000e-01, -7.66180009e-02,  3.70319992e-01,  3.28450017e-02,
+       -4.19569999e-01,  7.20689967e-02, -3.74760002e-01,  5.74599989e-02,
+       -1.24009997e-02,  5.29489994e-01, -5.23800015e-01, -1.97710007e-01,
+       -3.41470003e-01,  5.33169985e-01, -2.53309999e-02,  1.73800007e-01,
+        1.67720005e-01,  8.39839995e-01,  5.51070012e-02,  1.05470002e-01,
+        3.78719985e-01,  2.42750004e-01,  1.47449998e-02,  5.59509993e-01,
+        1.25210002e-01, -6.75960004e-01,  3.58420014e-01, -4.00279984e-02,
+        9.59490016e-02, -5.06900012e-01, -8.53179991e-02,  1.79800004e-01,
+        3.38669986e-01,  1.32300004e-01,  3.10209990e-01,  2.18779996e-01,
+        1.68530002e-01,  1.98740005e-01, -5.73849976e-01, -1.06490001e-01,
+        2.66689986e-01,  1.28380001e-01, -1.28030002e-01, -1.32839993e-01,
+        1.26570001e-01,  8.67229998e-01,  9.67210010e-02,  4.83060002e-01,
+        2.12709993e-01, -5.49900010e-02, -8.24249983e-02,  2.24079996e-01,
+        2.39749998e-01, -6.22599982e-02,  6.21940017e-01, -5.98999977e-01,
+        4.32009995e-01,  2.81430006e-01,  3.38420011e-02, -4.88150001e-01,
+       -2.13589996e-01,  2.74010003e-01,  2.40950003e-01,  4.59500015e-01,
+       -1.86049998e-01, -1.04970002e+00, -9.73049998e-02, -1.89080000e-01,
+       -7.09290028e-01,  4.01950002e-01, -1.87680006e-01,  5.16870022e-01,
+        1.25200003e-01,  8.41499984e-01,  1.20970003e-01,  8.82389992e-02,
+       -2.91959997e-02,  1.21510006e-03,  5.68250008e-02, -2.74210006e-01,
+        2.55640000e-01,  6.97930008e-02, -2.22580001e-01, -3.60060006e-01,
+       -2.24020004e-01, -5.36990017e-02,  1.20220006e+00,  5.45350015e-01,
+       -5.79980016e-01,  1.09049998e-01,  4.21669990e-01,  2.06619993e-01,
+        1.29360005e-01, -4.14570011e-02, -6.67770028e-01,  4.04670000e-01,
+       -1.52179999e-02, -2.76400000e-01, -1.56110004e-01, -7.91980028e-02,
+        4.00369987e-02, -1.29439995e-01, -2.40900001e-04, -2.67850012e-01,
+       -3.81150007e-01, -9.72450018e-01,  3.17259997e-01, -4.39509988e-01,
+        4.19340014e-01,  1.83530003e-01, -1.52600005e-01, -1.08080000e-01,
+       -1.03579998e+00,  7.62170032e-02,  1.65189996e-01,  2.65259994e-04,
+        1.66160002e-01, -1.52810007e-01,  1.81229994e-01,  7.02740014e-01,
+        5.79559989e-03,  5.16639985e-02, -5.97449988e-02, -2.75510013e-01,
+       -3.90489995e-01,  6.11319989e-02,  5.54300010e-01, -8.79969969e-02,
+       -4.16810006e-01,  3.28260005e-01, -5.25489986e-01, -4.42880005e-01,
+        8.21829960e-03,  2.44859993e-01, -2.29819998e-01, -3.49810004e-01,
+        2.68940002e-01,  3.91660005e-01, -4.19039994e-01,  1.61909997e-01,
+       -2.62630010e+00,  6.41340017e-01,  3.97430003e-01, -1.28680006e-01,
+       -3.19460005e-01, -2.56330013e-01, -1.22199997e-01,  3.22750002e-01,
+       -7.99330026e-02, -1.53479993e-01,  3.15050006e-01,  3.05909991e-01,
+        2.60120004e-01,  1.85530007e-01, -2.40429997e-01,  4.28860001e-02,
+        4.06219989e-01, -2.42559999e-01,  6.38700008e-01,  6.99829996e-01,
+       -1.40430003e-01,  2.52090007e-01,  4.89840001e-01, -6.10670000e-02,
+       -3.67659986e-01, -5.50890028e-01, -3.82649988e-01, -2.08430007e-01,
+        2.28320003e-01,  5.12179971e-01,  2.78679997e-01,  4.76520002e-01,
+        4.79510017e-02, -3.40079993e-01, -3.28729987e-01, -4.19669986e-01,
+       -7.54989982e-02, -3.89539987e-01, -2.96219997e-02, -3.40700001e-01,
+        2.21699998e-01, -6.28560036e-02, -5.19029975e-01, -3.77739996e-01,
+       -4.34770016e-03, -5.83010018e-01, -8.75459984e-02, -2.39289999e-01,
+       -2.47109994e-01, -2.58870006e-01, -2.98940003e-01,  1.37150005e-01,
+        2.98919994e-02,  3.65439989e-02, -4.96650010e-01, -1.81600004e-01,
+        5.29389977e-01,  2.19919994e-01, -4.45140004e-01,  3.77979994e-01,
+       -5.70620000e-01, -4.69460003e-02,  8.18059966e-02,  1.92789994e-02,
+        3.32459986e-01, -1.46200001e-01,  1.71560004e-01,  3.99809986e-01,
+        3.62170011e-01,  1.28160000e-01,  3.16439986e-01,  3.75690013e-01,
+       -7.46899992e-02, -4.84800003e-02, -3.14009994e-01, -1.92860007e-01,
+       -3.12940001e-01, -1.75529998e-02, -1.75139993e-01, -2.75870003e-02,
+       -1.00000000e+00,  1.83870003e-01,  8.14339995e-01, -1.89129993e-01,
+        5.09989977e-01, -9.19600017e-03, -1.92950002e-03,  2.81890005e-01,
+        2.72470005e-02,  4.34089988e-01, -5.49669981e-01, -9.74259973e-02,
+       -2.45399997e-01, -1.72030002e-01, -8.86500031e-02, -3.02980006e-01,
+       -1.35910004e-01, -2.77649999e-01,  3.12860007e-03,  2.05559999e-01,
+       -1.57720000e-01, -5.23079991e-01, -6.47010028e-01, -3.70139986e-01,
+        6.93930015e-02,  1.14009999e-01,  2.75940001e-01, -1.38750002e-01,
+       -2.72680014e-01,  6.68910027e-01, -5.64539991e-02,  2.40170002e-01,
+       -2.67300010e-01,  2.98599988e-01,  1.00830004e-01,  5.55920005e-01,
+        3.28489989e-01,  7.68579990e-02,  1.55279994e-01,  2.56359994e-01,
+       -1.07720003e-01, -1.23590000e-01,  1.18270002e-01, -9.90289971e-02,
+       -3.43279988e-01,  1.15019999e-01, -3.78080010e-01, -3.90120000e-02,
+       -3.45930010e-01, -1.94040000e-01, -3.35799992e-01, -6.23340011e-02,
+        2.89189994e-01,  2.80319989e-01, -5.37410021e-01,  6.27939999e-01,
+        5.69549985e-02,  6.21469975e-01, -2.52819985e-01,  4.16700006e-01,
+       -1.01079997e-02, -2.54339993e-01,  4.00029987e-01,  4.24320012e-01,
+        2.26720005e-01,  1.75530002e-01,  2.30489999e-01,  2.83230007e-01,
+        1.38820007e-01,  3.12180002e-03,  1.70570001e-01,  3.66849989e-01,
+        2.52470002e-03, -6.40089989e-01, -2.97650009e-01,  7.89430022e-01,
+        3.31680000e-01, -1.19659996e+00, -4.71559986e-02,  5.31750023e-01])
+    return a
+

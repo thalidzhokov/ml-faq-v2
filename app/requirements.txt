@@ -12,3 +12,7 @@ pymystem3
 pytz
 spacy
 uwsgi
+numpy
+pickle
+nltk
+string
