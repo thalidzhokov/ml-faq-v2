@@ -23,6 +23,7 @@ class Question(models.Model):
     class Meta:
         ordering = ["-answer_id", "-id", "question"]
 
+
 class Rating(models.Model):
     vote = models.PositiveSmallIntegerField(blank=True, null=True)
     knn = models.PositiveSmallIntegerField(blank=True, null=True)

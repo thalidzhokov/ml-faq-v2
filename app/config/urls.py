@@ -21,7 +21,6 @@ from faq.views import vote_knn, vote_random_forest, vote_cosine_distance, FaqVie
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
     path('admin/filebrowser/', site.urls, name='filebrowser'),
-    # path('faq/', FaqListView.as_view()),
     path('vote_knn/', vote_knn, name='vote-knn'),
     path('vote_random_forest/', vote_random_forest, name='vote-random-forest'),
     path('vote_cosine_distance/', vote_cosine_distance, name='vote-cosine-distance'),

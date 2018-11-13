@@ -8,38 +8,31 @@
     {% csrf_token %}
     {{ form }}
     <input type="submit" value="Submit">
+
 </form>
 <br><br>
-    <h2>KNN</h2> {{ knn }}
-    <h2>{{ test }}</h2>
+<h2>KNN</h2> {{ knn }}
+<h2>{{ test }}</h2>
 <form action="http://127.0.0.1:8001/vote_knn/" method="get">
     {% csrf_token %}
-    <input type="submit" value="Vote KNN">
-    <!--onclick="this.disabled=true;" чтобы кнопка не нажималась второй раз-->
+    <input type="submit" class="btn btn-success btn-lg" value="Vote KNN">
 </form>
 
 <hr><br>
-    <h2>Random Forest</h2> {{ rf }}
-    <h2>{{ random_forest }}</h2>
+<h2>Random Forest</h2> {{ rf }}
+<h2>{{ random_forest }}</h2>
 <form action="http://127.0.0.1:8001/vote_random_forest/" method="get">
     {% csrf_token %}
-    <input type="submit" value="Vote Random Forest">
+    <input type="submit" class="btn btn-success btn-lg" value="Vote Random Forest">
 </form>
+
 <hr><br>
-    <h2>Cosine Distance</h2> {{ cd }}
-    <h2>{{ random_forest }}</h2>
+<h2>Cosine Distance</h2> {{ cd }}
+<h2>{{ cosine_distance }}</h2>
 <form action="http://127.0.0.1:8001/vote_cosine_distance/" method="get">
     {% csrf_token %}
-    <input type="submit" value="Vote Cosine Distance">
+    <input type="submit" class="btn btn-success btn-lg" value="Vote Cosine Distance">
 </form>
 <hr><br>
 
-
 {% endblock %}
-
-
-    <!--<ol>-->
-        <!--{% for answer in object_list %}-->
-            <!--<li>{{ answer.answer }}</li>-->
-        <!--{% endfor %}-->
-    <!--</ol>-->

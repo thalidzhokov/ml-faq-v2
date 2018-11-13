@@ -18,6 +18,7 @@ class AnswerAdmin(ImportExportModelAdmin):
     change_results_template = "new_change_list.html"
     fields = ['answer']
     search_fields = ['id', 'answer']
+
     # queryset = []
 
     def get_urls(self):
@@ -29,28 +30,23 @@ class AnswerAdmin(ImportExportModelAdmin):
         ]
         return my_urls + urls
 
-
     def set_knn(self, request):
         a = Rating.objects.create(vote=1)
         a.vote += 1
         a.save()
         return HttpResponseRedirect("http://127.0.0.1:8000/admin/faq/answer/?q=%D0%B0%D0%B2%D0%B0")
 
-
     def set_random_forest(self):
         self.model.objects.all().update(vote=random_forest)
         self.vote += 1
         self.vote.save()
-
 
     def set_cosine_distance(self):
         self.model.objects.all().update(vote=cosine_distance)
         self.vote += 1
         self.vote.save()
 
-
     def get_search_results(self, request, queryset, search_term):
-
         queryset, use_distinct = super(AnswerAdmin, self).get_search_results(request, queryset, search_term)
 
         result = predict_question_knn(search_term)

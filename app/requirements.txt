@@ -16,3 +16,6 @@ numpy
 pickle
 nltk
 string
+collections
+sklearn
+gensim
