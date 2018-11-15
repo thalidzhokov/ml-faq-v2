@@ -26,6 +26,7 @@ services:
           - "80:80"
         volumes:
           - appdata:/app
+          - tmpdata:/tmp
           - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
           - ./nginx/nginx.conf:/etc/nginx/nginx.conf
           - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -60,6 +61,8 @@ services:
           # Entrypoint
           - ./app/uwsgi.ini:/app/uwsgi.ini
           - ./app/entrypoint.sh:/app/entrypoint.sh
+          # tmp
+          - tmpdata:/tmp
         depends_on:
           - db
 
@@ -70,4 +73,5 @@ volumes:
         type: none
         device: ${PWD}/app
         o: bind
+    tmpdata:
     pgdata:

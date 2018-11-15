@@ -18,6 +18,7 @@ class AnswerAdmin(ImportExportModelAdmin):
     change_results_template = "new_change_list.html"
     fields = ['answer']
     search_fields = ['id', 'answer']
+    list_display = ['id', 'answer']
 
     # queryset = []
 
@@ -73,6 +74,7 @@ admin.site.register(Answer, AnswerAdmin)
 class QuestionAdmin(ImportExportModelAdmin):
     fields = ['question', 'answer_id']
     search_fields = ['id', 'question', 'answer_id']
+    list_display = ['id', 'question', 'answer_id']
 
     class Meta:
         model = Question
