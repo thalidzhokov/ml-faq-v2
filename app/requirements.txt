@@ -13,9 +13,6 @@ pytz
 spacy
 uwsgi
 numpy
-pickle
 nltk
-string
-collections
 sklearn
 gensim

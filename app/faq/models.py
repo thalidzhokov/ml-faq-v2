@@ -1,6 +1,7 @@
 from django.db import models
 
 
+
 class Answer(models.Model):
     id = models.AutoField(primary_key=True, help_text='Идентификатор ответа')
     answer = models.TextField(blank=True, help_text='Ответ', null=True)
@@ -25,7 +26,5 @@ class Question(models.Model):
 
 
 class Rating(models.Model):
-    vote = models.PositiveSmallIntegerField(blank=True, null=True)
-    knn = models.PositiveSmallIntegerField(blank=True, null=True)
-    random_forest = models.PositiveSmallIntegerField(blank=True, null=True)
-    cosine_distance = models.PositiveSmallIntegerField(blank=True, null=True)
+    name = models.CharField(max_length=128, blank=True, null=True)
+    vote_score = models.IntegerField(blank=True, null=True)

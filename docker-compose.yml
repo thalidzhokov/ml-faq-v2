@@ -71,4 +71,3 @@ volumes:
         device: ${PWD}/app
         o: bind
     pgdata:
-

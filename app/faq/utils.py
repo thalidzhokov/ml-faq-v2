@@ -97,7 +97,7 @@ def predict_question_rf(question):
 
     clas = int(data.labels[predicted_1])
     df = data['answers'].loc[data['labels'] == clas]
-    return (question, df.iloc[0])
+    return df.iloc[0]
 
 
 # index.values https://brlhq.slack.com/archives/GB6RNKYUD/p1541757643006100
@@ -110,7 +110,7 @@ def predict_question_knn(question):
 
     clas = int(data.labels[predicted_2])
     df = data['answers'].loc[data['labels'] == clas]
-    return (question, df.iloc[0])
+    return df.iloc[0]
 
 
 def predict_question_cosine(question):
@@ -122,4 +122,4 @@ def predict_question_cosine(question):
 
     clas = int(data.labels[cos_dist[0][0]])
     df = data['answers'].loc[data['labels'] == clas]
-    return (question, df.iloc[0])
+    return df.iloc[0]
