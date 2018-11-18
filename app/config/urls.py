@@ -15,15 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from filebrowser.sites import site
-from faq.views import vote_knn, vote_random_forest, vote_cosine_distance, FaqView, QuestionsApiView
+# from filesbrowser.sites import site
+from faq.views import vote_knn, vote_random_forest, vote_cosine_distance, FaqView, QuestionsApiView, FaqViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
-    path('admin/filebrowser/', site.urls, name='filebrowser'),
+    # path('admin/filebrowser/', site.urls, name='filebrowser'),
     path('vote_knn/', vote_knn, name='vote-knn'),
     path('vote_random_forest/', vote_random_forest, name='vote-random-forest'),
     path('vote_cosine_distance/', vote_cosine_distance, name='vote-cosine-distance'),
     path('faq/', FaqView.as_view(), name='faq-view'),
     path('api/questions/', QuestionsApiView.as_view(), name='api-questions'),
+    path('api/questions/add/', FaqViewSet.as_view(), name='api-questions-add'),
 ]

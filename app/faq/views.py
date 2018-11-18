@@ -1,14 +1,18 @@
 from django.shortcuts import render
 from django import forms
-from .models import Rating
+from .models import Rating, Answer
 from django.http import HttpResponseRedirect
 from django.views import View
 from faq.utils import predict_question_knn, predict_question_rf, predict_question_cosine
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import viewsets
 
 
 class QuestionsApiView(APIView):
+    @classmethod
+    def get_extra_actions(cls):
+        return []
     """
     post: return answer
     """
@@ -21,7 +25,7 @@ class QuestionsApiView(APIView):
     def get(self, request):
         data = request.data
         print(request.data)
-        return Response('fdf')
+        return Response('use the post method, please')
 
     # def post(self, request, format=None):
     #     serializer = SnippetSerializer(data=request.data)
@@ -93,3 +97,13 @@ def vote_cosine_distance(request):
     return HttpResponseRedirect('/faq/')
 
 
+class FaqViewSet(APIView):
+
+    def get(self, request):
+        return Response('use the post method, please')
+
+    def post(self, request):
+        question = request.data.get('question')
+        answer = request.data.get('answer')
+
+        return Response('fdfs')
