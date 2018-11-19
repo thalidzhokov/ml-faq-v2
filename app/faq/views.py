@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django import forms
-from .models import Rating, Answer
+from .models import Rating, Answer, Question
 from django.http import HttpResponseRedirect
 from django.views import View
 from faq.utils import predict_question_knn, predict_question_rf, predict_question_cosine
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets
+from rest_framework import status
 
 
 class QuestionsApiView(APIView):
@@ -16,33 +17,29 @@ class QuestionsApiView(APIView):
     """
     post: return answer
     """
-    # def get(self, request, format=None):
-    #     snippets = Snippet.objects.all()
-    #     serializer = SnippetSerializer(snippets, many=True)
-    #     return Response(serializer.data)
-
 
     def get(self, request):
         data = request.data
         print(request.data)
         return Response('use the post method, please')
 
-    # def post(self, request, format=None):
-    #     serializer = SnippetSerializer(data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def post(self, request):
         question = request.data.get('question')
-        return Response(
+        return Response([
+
             {
-        "knn": predict_question_knn(question),
-        "random_forest": predict_question_rf(question),
-        "cosine_distance": predict_question_cosine(question)
+                "id": 1,
+                "text": predict_question_knn(question)
+            },
+            {
+                "id": 2,
+                "text": predict_question_rf(question)
+            },
+            {
+                "id": 3,
+                "text": predict_question_cosine(question)
             }
-        )
+            ])
 
 
 class QuestionForm(forms.Form):
@@ -61,9 +58,6 @@ class FaqView(View):
         form = self.form_class
         return render(request, self.template_name, {
             'form': form,
-            # "test": predict_question_knn(question),
-            # "random_forest": predict_question_rf(question),
-            # "cosine_distance": predict_question_cosine(question),
             "knn": Rating.objects.get(name='knn').vote_score,
             "rf": Rating.objects.get(name='random_forest').vote_score,
             "cd": Rating.objects.get(name='cosine_distance').vote_score,
@@ -103,7 +97,12 @@ class FaqViewSet(APIView):
         return Response('use the post method, please')
 
     def post(self, request):
-        question = request.data.get('question')
         answer = request.data.get('answer')
+        question = request.data.get('question')
 
-        return Response('fdfs')
+        set1 = Answer.objects.create(answer=answer)
+        set1.save()
+        set2 = Question.objects.create(question=question, answer_id=set1)
+        set2.save()
+
+        return Response(status=status.HTTP_201_CREATED)
