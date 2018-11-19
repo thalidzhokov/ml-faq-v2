@@ -25,20 +25,19 @@ class QuestionsApiView(APIView):
 
     def post(self, request):
         question = request.data.get('question')
+        # назвать индексы
         return Response([
+            {
+                "top_1": predict_question_cosine(question)
+            },
 
             {
-                "id": 1,
-                "text": predict_question_knn(question)
+                "top_2": predict_question_knn(question)
             },
             {
-                "id": 2,
-                "text": predict_question_rf(question)
-            },
-            {
-                "id": 3,
-                "text": predict_question_cosine(question)
+                "top_3": predict_question_rf(question)
             }
+
             ])
 
 
@@ -105,4 +104,4 @@ class FaqViewSet(APIView):
         set2 = Question.objects.create(question=question, answer_id=set1)
         set2.save()
 
-        return Response(status=status.HTTP_201_CREATED)
+        return Response('ok', status=status.HTTP_201_CREATED)
