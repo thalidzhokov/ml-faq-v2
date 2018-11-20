@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django import forms
-from .models import Rating, Answer, Question
+from .models import Rating, Answer, Question, Statistic
 from django.http import HttpResponseRedirect
 from django.views import View
 from faq.utils import predict_question_knn, predict_question_rf, predict_question_cosine
@@ -14,6 +14,7 @@ class QuestionsApiView(APIView):
     @classmethod
     def get_extra_actions(cls):
         return []
+
     """
     post: return answer
     """
@@ -26,19 +27,15 @@ class QuestionsApiView(APIView):
     def post(self, request):
         question = request.data.get('question')
         # назвать индексы
-        return Response([
-            {
-                "top_1": predict_question_cosine(question)
-            },
+        return Response({
 
-            {
-                "top_2": predict_question_knn(question)
-            },
-            {
-                "top_3": predict_question_rf(question)
-            }
+            "top_1": predict_question_cosine(question),
 
-            ])
+            "top_2": predict_question_knn(question),
+
+            "top_3": predict_question_rf(question)
+
+        })
 
 
 class QuestionForm(forms.Form):
@@ -90,6 +87,15 @@ def vote_cosine_distance(request):
     return HttpResponseRedirect('/faq/')
 
 
+def save_statistics(answer, question):
+    Statistic.objects.create(
+        question=question,
+        answer=answer,
+        right_answer='заглушка',
+        user=request.user,
+    )
+
+
 class FaqViewSet(APIView):
 
     def get(self, request):
@@ -103,5 +109,15 @@ class FaqViewSet(APIView):
         set1.save()
         set2 = Question.objects.create(question=question, answer_id=set1)
         set2.save()
+
+        # save_statistics(question, answer)
+        # print(save_statistics(question, answer))
+
+        # Statistic.objects.create(
+        #     question=question,
+        #     answer=answer,
+        #     right_answer='заглушка',
+        #     user=request.user,
+        # )
 
         return Response('ok', status=status.HTTP_201_CREATED)

@@ -42,11 +42,12 @@ RUN pip install -r requirements.txt
 
 # Spacy
 # Fasttext vectors https://fasttext.cc/docs/en/crawl-vectors.html
-RUN if [ ! -f "uploads/cc.ru.300.vec.gz" ]; then wget https://s3-us-west-1.amazonaws.com/fasttext-vectors/word-vectors-v2/cc.ru.300.vec.gz -O uploads/cc.ru.300.vec.gz; fi
+#RUN if [ ! -f "uploads/cc.ru.300.vec.gz" ]; then wget https://s3-us-west-1.amazonaws.com/fasttext-vectors/word-vectors-v2/cc.ru.300.vec.gz -O uploads/cc.ru.300.vec.gz; fi
 
 # Inint model
-RUN mkdir -p /tmp/fasttext-vectors/word-vectors-v2
-RUN python -m spacy init-model ru /tmp/fasttext-vectors/word-vectors-v2 --vectors-loc uploads/cc.ru.300.vec.gz
+#RUN mkdir -p /tmp/fasttext-vectors/word-vectors-v2
+#RUN python -m spacy init-model ru /tmp/fasttext-vectors/word-vectors-v2 --vectors-loc uploads/cc.ru.300.vec
+RUN python -c 'import nltk; nltk.download("stopwords"); nltk.download("punkt")'
 
 
 # Entrypoint

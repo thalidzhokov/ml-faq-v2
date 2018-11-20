@@ -30,8 +30,11 @@ stops.extend(
      'из', 'под',
      'возможно', 'https', 'ваш', 'весь', 'свой', 'сей', 'вчера', 'который', 'несколько', 'уважаемый'])
 
-# load pretrained model
-ft = KeyedVectors.load_word2vec_format(('cc.ru.300.vec'), binary=False)
+F = np.memmap("uploads/fasttext/embed.dat", dtype='float32', mode="r", shape=(2000000, 300))
+with open("uploads/fasttext/embed.vocab") as f:
+    vocab_list = map(str.strip, f.readlines())
+
+vocab_dict = {w: k for k, w in enumerate(vocab_list)}
 
 
 def normalize(text):
@@ -42,16 +45,16 @@ def normalize(text):
     return ' '.join(words)
 
 
-data = pd.read_csv('df_all_class_labels.csv', sep='\t')
+data = pd.read_csv('uploads/df_all_class_labels.csv', sep='\t')
 
 data['texts_norm'] = data['texts'].apply(lambda x: normalize(x))
 
 # model_1 SVD+Random Forest
-filename = 'ft_vec_SVD_RandForest.sav'
+filename = 'uploads/ft_vec_SVD_RandForest.sav'
 loaded_model_RF = pickle.load(open(filename, 'rb'))
 
 # model_2 SVD+KNN
-filename = 'ft_vec_SVD_KNN.sav'
+filename = 'uploads/ft_vec_SVD_KNN.sav'
 loaded_model_KNN = pickle.load(open(filename, 'rb'))
 
 
@@ -76,7 +79,7 @@ def getWordVecs(text, dim):
     vectors = np.zeros((len(words), dim))
     for i, word in enumerate(words):
         try:
-            v = ft[word]
+            v = F[vocab_dict[word]]
             vectors[i] = v * (words[word] / total)  # просто умножаем вектор на частоту
         except (KeyError, ValueError):
             continue
