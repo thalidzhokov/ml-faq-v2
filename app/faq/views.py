@@ -102,10 +102,19 @@ class FaqViewSet(APIView):
         answer = request.data.get('answer')
         question = request.data.get('question')
 
-        set1 = Answer.objects.create(answer=answer)
-        set1.save()
-        set2 = Question.objects.create(question=question, answer_id=set1)
-        set2.save()
+        if Answer.objects.filter(answer=answer).exists():
+            return Response('this question already exist')
+        else:
+
+
+
+
+
+
+            set1 = Answer.objects.create(answer=answer)
+            set1.save()
+            set2 = Question.objects.create(question=question, answer_id=set1, answer_label=set1.id)
+            set2.save()
 
         # save_statistics(question, answer)
         # print(save_statistics(question, answer))
