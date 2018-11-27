@@ -3,7 +3,7 @@ services:
 
     db:
       container_name: "postgres"
-      image: postgres
+      image: postgres:10.3
       environment:
         POSTGRES_DB: $POSTGRES_DB
         POSTGRES_USER: $POSTGRES_USER

@@ -5,17 +5,29 @@
 import pandas as pd
 import numpy as np
 import pickle
+import scipy
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from string import punctuation
 from pymorphy2 import MorphAnalyzer
 from collections import Counter
 from sklearn.metrics.pairwise import cosine_distances
-from gensim.models import KeyedVectors
+#from gensim.models import KeyedVectors
+from .models import Question
+from django_pandas.io import read_frame
 
 morph = MorphAnalyzer()
 stops = stopwords.words('russian')
 punct = punctuation + '«»—…“”*№–'
+
+
+qs = Question.objects.all()
+data = read_frame(qs, fieldnames=['question', 'answer_id', 'answer_label'])
+
+values = {'answer_id': 'В письме с уведомлением внизу есть возможность отписаться от получения уведомлений.'}
+data = data.fillna(value=values)
+# data.to_csv('DATA.csv', sep='\t', index=False)
+
 
 stops.extend(
     ['что', 'это', 'так', 'вот', 'быть', 'как', 'в', 'к', 'на', 'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти',
@@ -38,35 +50,10 @@ vocab_dict = {w: k for k, w in enumerate(vocab_list)}
 
 
 def normalize(text):
-    # words = [word.strip(punct) for word in text.lower().split()]
     words = [word.strip(punct) for word in word_tokenize(text.lower())]
     words = [morph.parse(word)[0].normal_form for word in words]
     words = [word for word in words if word not in stops]
     return ' '.join(words)
-
-
-data = pd.read_csv('uploads/df_all_class_labels.csv', sep='\t')
-
-data['texts_norm'] = data['texts'].apply(lambda x: normalize(x))
-
-# model_1 SVD+Random Forest
-filename = 'uploads/ft_vec_SVD_RandForest.sav'
-loaded_model_RF = pickle.load(open(filename, 'rb'))
-
-# model_2 SVD+KNN
-filename = 'uploads/ft_vec_SVD_KNN.sav'
-loaded_model_KNN = pickle.load(open(filename, 'rb'))
-
-
-def vectorize(texts, strings_number, dim):
-    if strings_number == 1:
-        vects = np.zeros((strings_number, dim))
-        vects[0] = getWordVecs(texts, dim)
-    else:
-        vects = np.zeros((strings_number, dim))
-        for i, text in enumerate(texts.values):
-            vects[i] = getWordVecs(text, dim)
-    return vects
 
 
 # функция для поиска векторов в предобученных векторах Fasttext
@@ -92,37 +79,69 @@ def getWordVecs(text, dim):
     return vector
 
 
-def predict_question_rf(question):
-    prep = normalize(question)
-    dim = 300
-    vects_prep = vectorize(prep, 1, dim)
-    predicted_1 = loaded_model_RF.predict(vects_prep)
+def vectorize(texts, strings_number, dim):
+    if strings_number == 1:
+        vects = np.zeros((strings_number, dim))
+        vects[0] = getWordVecs(texts, dim)
+    else:
+        vects = np.zeros((strings_number, dim))
+        for i, text in enumerate(texts.values):
+            vects[i] = getWordVecs(text, dim)
+    return vects
 
-    clas = int(data.labels[predicted_1])
-    df = data['answers'].loc[data['labels'] == clas]
-    return df.iloc[0]
+
+data['texts_norm'] = data['question'].apply(lambda x: normalize(x))
+
+# model_1 SVD+Random Forest
+filename = 'uploads/ft_vec_SVD_RF_new.sav'
+loaded_model_RF = pickle.load(open(filename, 'rb'))
+
+# model_2 SVD+KNN
+filename = 'uploads/ft_vec_SVD_KNN_new.sav'
+loaded_model_KNN = pickle.load(open(filename, 'rb'))
 
 
-# index.values https://brlhq.slack.com/archives/GB6RNKYUD/p1541757643006100
-
-def predict_question_knn(question):
-    prep = normalize(question)
-    dim = 300
-    vects_prep = vectorize(prep, 1, dim)
-    predicted_2 = loaded_model_KNN.predict(vects_prep)
-
-    clas = int(data.labels[predicted_2])
-    df = data['answers'].loc[data['labels'] == clas]
-    return df.iloc[0]
+# def predict_question_rf(question):
+#     prep = normalize(question)
+#     print(prep, 'prep')
+#     dim = 300
+#     vects_prep = vectorize(prep, 1, dim)
+#     predicted_1 = loaded_model_RF.predict(vects_prep)
+#
+#     clas = int(data.label[predicted_1])
+#     print(clas, 'clas')
+#     #df = data['answer_id'].loc[data['answer_label'] == clas]
+#     # return data.loc[data['answer_id'] == clas, 'answer_label'].iloc[0]
+#     return data.loc[data['answer'] == clas, 'label'].iloc[0]
+#
+#
+# def predict_question_knn(question):
+#     prep = normalize(question)
+#     dim = 300
+#     vects_prep = vectorize(prep, 1, dim)
+#     predicted_2 = loaded_model_KNN.predict(vects_prep)
+#
+#     clas = int(data.label[predicted_2])
+#     #df = data['answer_id'].loc[data['answer_label'] == clas]
+#     # return data.loc[data['answer_id'] == clas, 'answer_label'].iloc[0]
+#     return data.loc[data['answer'] == clas, 'label'].iloc[0]
 
 
 def predict_question_cosine(question):
+
     dim = 300
     prep = normalize(question)
     vects_prep = vectorize(prep, 1, dim)
     vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim)
     cos_dist = cosine_distances(vects_prep, vects_ft).argsort()
 
-    clas = int(data.labels[cos_dist[0][0]])
-    df = data['answers'].loc[data['labels'] == clas]
-    return df.iloc[0]
+    cos_list = list(cos_dist[0][:])
+    lst = []
+    for i in cos_list:
+        lst.append(data['answer_id'].loc[data.index == i].values[0])
+
+    df = pd.DataFrame(lst, columns=['cosanswer'])
+    df = df.drop_duplicates(subset='cosanswer')
+
+    return list(df['cosanswer'].values[:3])  # это список из ответов в количестве 3 шт.
+

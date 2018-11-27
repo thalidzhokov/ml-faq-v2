@@ -11,3 +11,5 @@ numpy
 nltk
 gensim
 sklearn
+scipy
+django-pandas

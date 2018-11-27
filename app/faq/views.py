@@ -3,7 +3,7 @@ from django import forms
 from .models import Rating, Answer, Question, Statistic
 from django.http import HttpResponseRedirect
 from django.views import View
-from faq.utils import predict_question_knn, predict_question_rf, predict_question_cosine
+from faq.utils import predict_question_cosine
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets
@@ -26,14 +26,11 @@ class QuestionsApiView(APIView):
 
     def post(self, request):
         question = request.data.get('question')
-        # назвать индексы
         return Response({
 
-            "top_1": predict_question_cosine(question),
-
-            "top_2": predict_question_knn(question),
-
-            "top_3": predict_question_rf(question)
+            "top_1": predict_question_cosine(question)[0],
+            "top_2": predict_question_cosine(question)[1],
+            "top_3": predict_question_cosine(question)[2]
 
         })
 
