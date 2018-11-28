@@ -103,6 +103,9 @@ class FaqViewSet(APIView):
         question = request.data.get('question')
 
         if Answer.objects.filter(answer=answer).exists():
+            current_answer = Answer.objects.get(answer=answer)
+            a = Question.objects.create(question=question, answer_id=current_answer, answer_label=current_answer.id)
+            a.save()
             return Response('this question already exist')
         else:
 
