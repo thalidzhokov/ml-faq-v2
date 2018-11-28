@@ -111,10 +111,11 @@ class FaqViewSet(APIView):
 
 
 
+
             set1 = Answer.objects.create(answer=answer)
-            set1.save()
+            # set1.save()
             set2 = Question.objects.create(question=question, answer_id=set1, answer_label=set1.id)
-            set2.save()
+            # set2.save()
 
         # save_statistics(question, answer)
         # print(save_statistics(question, answer))

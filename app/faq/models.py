@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+import uwsgi
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
@@ -33,6 +34,11 @@ class Question(models.Model):
 
     class Meta:
         ordering = ["-answer_id", "-id", "question"]
+
+
+@receiver(post_save, sender=Question)
+def reload_data(sender, **kwargs):
+    uwsgi.reload()
 
 
 class Rating(models.Model):
