@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 # from filesbrowser.sites import site
-from faq.views import vote_knn, vote_random_forest, vote_cosine_distance, FaqView, QuestionsApiView, FaqViewSet
+from faq.views import vote_knn, vote_random_forest, vote_cosine_distance, FaqView, QuestionsApiView, FaqViewSet, RandomForecastViewSet
 from rest_framework.authtoken import views
 
 urlpatterns = [
@@ -27,6 +27,7 @@ urlpatterns = [
     path('vote_cosine_distance/', vote_cosine_distance, name='vote-cosine-distance'),
     path('faq/', FaqView.as_view(), name='faq-view'),
     path('api/questions/', QuestionsApiView.as_view(), name='api-questions'),
+    path('api/random_forecast/', RandomForecastViewSet.as_view(), name='api-random-forecasts'),
     path('api/questions/add/', FaqViewSet.as_view(), name='api-questions-add'),
     path('api-token-auth/', views.obtain_auth_token),
 ]

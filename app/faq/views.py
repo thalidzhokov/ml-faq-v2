@@ -8,6 +8,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework import status
+import requests
+import json
+import random
 
 
 class QuestionsApiView(APIView):
@@ -131,3 +134,17 @@ class FaqViewSet(APIView):
         # )
 
         return Response('ok', status=status.HTTP_201_CREATED)
+
+
+class RandomForecastViewSet(APIView):
+
+    def get(self, request):
+        url = 'https://bookmaker-ratings.ru/wp-json/bmr/v1.2/tips/posts/'
+        payload = {'filter': 'today'}
+        r = requests.get(url, params=payload).json().get('list')
+        ids = []
+        for i in r:
+            ids.append(i.get('id'))
+        random_forecast = requests.get(f'{url}{random.choice(ids)}').json().get('content')
+
+        return Response({"random_forecast": random_forecast})
