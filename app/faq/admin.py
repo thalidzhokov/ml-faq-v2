@@ -6,8 +6,9 @@ from import_export import widgets, fields, resources
 from import_export.admin import ImportExportModelAdmin
 from import_export.admin import ImportExportActionModelAdmin
 
-from .models import Answer, Question, Rating
+from .models import Answer, Question, S7Data
 from django.http import HttpResponseRedirect
+from django.contrib.admin import AdminSite
 
 admin.site.site_header = 'FAQ'
 
@@ -80,3 +81,23 @@ class QuestionAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(Question, QuestionAdmin)
+
+
+class S7Admin(AdminSite):
+    site_header = "S7 Admin Panel"
+    site_title = "S7 Admin Panel"
+    index_title = "Welcome to S7 Admin Panel"
+    fields = ['question','answer']
+    list_display = ['id', 'question', 'answer']
+
+    class Meta:
+        model = S7Data
+
+
+
+
+s7_admin_site = S7Admin(name='s7_admin')
+
+s7_admin_site.register(S7Data)
+
+

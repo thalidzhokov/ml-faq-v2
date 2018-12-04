@@ -15,6 +15,7 @@ from sklearn.metrics.pairwise import cosine_distances
 #from gensim.models import KeyedVectors
 from .models import Question
 from django_pandas.io import read_frame
+from gensim.models import FastText
 
 morph = MorphAnalyzer()
 stops = stopwords.words('russian')
@@ -27,7 +28,6 @@ data = read_frame(qs, fieldnames=['question', 'answer_id', 'answer_label'])
 values = {'answer_id': 'В письме с уведомлением внизу есть возможность отписаться от получения уведомлений.'}
 data = data.fillna(value=values)
 # data.to_csv('DATA.csv', sep='\t', index=False)
-
 
 stops.extend(
     ['что', 'это', 'так', 'вот', 'быть', 'как', 'в', 'к', 'на', 'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти',
@@ -48,6 +48,8 @@ with open("uploads/fasttext/embed.vocab") as f:
 
 vocab_dict = {w: k for k, w in enumerate(vocab_list)}
 
+fname = 'uploads/fasttext-own.model'
+fast_text = FastText.load(fname)
 
 def normalize(text):
     words = [word.strip(punct) for word in word_tokenize(text.lower())]
@@ -55,9 +57,9 @@ def normalize(text):
     words = [word for word in words if word not in stops]
     return ' '.join(words)
 
-
+#pretrained: model = F[vocab_dict[word]]
 # функция для поиска векторов в предобученных векторах Fasttext
-def getWordVecs(text, dim):
+def getWordVecs(text, dim, model):
     text = text.split()
     # чтобы не доставать одно слово несколько раз
     # сделаем счетчик, а потом векторы домножим на частоту
@@ -66,7 +68,10 @@ def getWordVecs(text, dim):
     vectors = np.zeros((len(words), dim))
     for i, word in enumerate(words):
         try:
-            v = F[vocab_dict[word]]
+            if model != 'embed':
+                v = model[word]
+            else:
+                v = F[vocab_dict[word]]
             vectors[i] = v * (words[word] / total)  # просто умножаем вектор на частоту
         except (KeyError, ValueError):
             continue
@@ -79,14 +84,15 @@ def getWordVecs(text, dim):
     return vector
 
 
-def vectorize(texts, strings_number, dim):
+def vectorize(texts, strings_number, dim, model):
     if strings_number == 1:
         vects = np.zeros((strings_number, dim))
-        vects[0] = getWordVecs(texts, dim)
+        vects[0] = getWordVecs(texts, dim, model)
     else:
         vects = np.zeros((strings_number, dim))
         for i, text in enumerate(texts.values):
-            vects[i] = getWordVecs(text, dim)
+            vects[i] = getWordVecs(text, dim, model)
+
     return vects
 
 
@@ -127,12 +133,13 @@ loaded_model_KNN = pickle.load(open(filename, 'rb'))
 #     return data.loc[data['answer'] == clas, 'label'].iloc[0]
 
 
-def predict_question_cosine(question):
-
-    dim = 300
+def predict_question_cosine(question, model, dim=100):
+    if model == 'embed':
+        dim = 300
+    print(f'\n\n\n\n{dim}')
     prep = normalize(question)
-    vects_prep = vectorize(prep, 1, dim)
-    vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim)
+    vects_prep = vectorize(prep, 1, dim, fast_text.wv)
+    vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
     cos_dist = cosine_distances(vects_prep, vects_ft).argsort()
 
     cos_list = list(cos_dist[0][:])
@@ -144,4 +151,3 @@ def predict_question_cosine(question):
     df = df.drop_duplicates(subset='cosanswer')
 
     return list(df['cosanswer'].values[:3])  # это список из ответов в количестве 3 шт.
-

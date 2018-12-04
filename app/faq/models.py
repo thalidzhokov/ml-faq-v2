@@ -4,7 +4,6 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
-import uwsgi
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
@@ -36,11 +35,6 @@ class Question(models.Model):
         ordering = ["-answer_id", "-id", "question"]
 
 
-@receiver(post_save, sender=Question)
-def reload_data(sender, **kwargs):
-    uwsgi.reload()
-
-
 class Rating(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
     vote_score = models.IntegerField(blank=True, null=True)
@@ -55,3 +49,11 @@ class Statistic(models.Model):
     right_answer = models.TextField(blank=True, null=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='user_id')
+
+
+class S7Data(models.Model):
+    question = models.TextField(blank=True, help_text='Вопрос', null=True)
+    answer = models.TextField(blank=True, help_text='Ответ', null=True)
+
+    def __str__(self):
+        return self.question

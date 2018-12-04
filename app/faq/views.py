@@ -8,9 +8,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework import status
-import requests
 import json
 import random
+import uwsgi
+import requests
 
 
 class QuestionsApiView(APIView):
@@ -29,12 +30,12 @@ class QuestionsApiView(APIView):
 
     def post(self, request):
         question = request.data.get('question')
+        model = request.data.get('model')
+        result = predict_question_cosine(question, model)
         return Response({
-
-            "top_1": predict_question_cosine(question)[0],
-            "top_2": predict_question_cosine(question)[1],
-            "top_3": predict_question_cosine(question)[2]
-
+            "top_1": result[0],
+            "top_2": result[1],
+            "top_3": result[2]
         })
 
 
@@ -111,13 +112,6 @@ class FaqViewSet(APIView):
             a.save()
             return Response('this question already exist')
         else:
-
-
-
-
-
-
-
             set1 = Answer.objects.create(answer=answer)
             # set1.save()
             set2 = Question.objects.create(question=question, answer_id=set1, answer_label=set1.id)
@@ -135,9 +129,7 @@ class FaqViewSet(APIView):
 
         return Response('ok', status=status.HTTP_201_CREATED)
 
-
 class RandomForecastViewSet(APIView):
-
     def get(self, request):
         url = 'https://bookmaker-ratings.ru/wp-json/bmr/v1.2/tips/posts/'
         payload = {'filter': 'today'}
@@ -148,3 +140,13 @@ class RandomForecastViewSet(APIView):
         random_forecast = requests.get(f'{url}{random.choice(ids)}').json().get('content')
 
         return Response({"random_forecast": random_forecast})
+
+
+class ReloadAppViewSet(APIView):
+    url = 'http://46.101.255.21/api/questions/'
+
+    def get(self, request):
+        uwsgi.reload()
+        requests.post(self.url, data={'question': '', 'model': 'fasttext'})
+
+        return Response('The model will be restarted', status=status.HTTP_201_CREATED)
