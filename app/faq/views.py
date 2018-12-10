@@ -10,7 +10,7 @@ from rest_framework import viewsets
 from rest_framework import status
 import json
 import random
-import uwsgi
+# import uwsgi
 import requests
 
 
@@ -146,7 +146,22 @@ class ReloadAppViewSet(APIView):
     url = 'http://46.101.255.21/api/questions/'
 
     def get(self, request):
-        uwsgi.reload()
+        # uwsgi.reload()
         requests.post(self.url, data={'question': '', 'model': 'fasttext'})
 
         return Response('The model will be restarted', status=status.HTTP_201_CREATED)
+
+
+class CustomDataViewSet(APIView):
+
+    def post(self, request, username):
+        question = request.data.get('question')
+        model = request.data.get('model')
+        dataset = request.data.get('dataset')
+        result = predict_question_cosine(question, model, dataset)
+        print(dataset)
+        return Response({
+            "top_1": result[0],
+            "top_2": result[1],
+            "top_3": result[2],
+        })

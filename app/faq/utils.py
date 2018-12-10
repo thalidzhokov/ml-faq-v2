@@ -13,7 +13,7 @@ from pymorphy2 import MorphAnalyzer
 from collections import Counter
 from sklearn.metrics.pairwise import cosine_distances
 #from gensim.models import KeyedVectors
-from .models import Question
+from .models import Question, S7Question
 from django_pandas.io import read_frame
 from gensim.models import FastText
 
@@ -22,7 +22,8 @@ stops = stopwords.words('russian')
 punct = punctuation + '«»—…“”*№–'
 
 
-qs = Question.objects.all()
+qs = S7Question.objects.all()
+qs2 = Question.objects.all()
 data = read_frame(qs, fieldnames=['question', 'answer_id', 'answer_label'])
 
 values = {'answer_id': 'В письме с уведомлением внизу есть возможность отписаться от получения уведомлений.'}
@@ -134,6 +135,8 @@ loaded_model_KNN = pickle.load(open(filename, 'rb'))
 
 
 def predict_question_cosine(question, model, dim=100):
+    if request.user == 's7':
+        data = qs1
     if model == 'embed':
         dim = 300
     print(f'\n\n\n\n{dim}')
