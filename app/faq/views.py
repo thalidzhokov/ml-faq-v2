@@ -158,7 +158,7 @@ class CustomDataViewSet(APIView):
         question = request.data.get('question')
         model = request.data.get('model')
         dataset = request.data.get('dataset')
-        result = predict_question_cosine(question, model, dataset)
+        result = predict_question_cosine(question, model, username)
         print(dataset)
         return Response({
             "top_1": result[0],

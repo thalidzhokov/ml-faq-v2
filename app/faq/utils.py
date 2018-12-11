@@ -24,7 +24,8 @@ punct = punctuation + '«»—…“”*№–'
 
 qs = S7Question.objects.all()
 qs2 = Question.objects.all()
-data = read_frame(qs, fieldnames=['question', 'answer_id', 'answer_label'])
+data = read_frame(qs2, fieldnames=['question', 'answer_id', 'answer_label'])
+data_s7 = read_frame(qs, fieldnames=['question', 'answer_id', 'answer_label'])
 
 values = {'answer_id': 'В письме с уведомлением внизу есть возможность отписаться от получения уведомлений.'}
 data = data.fillna(value=values)
@@ -98,6 +99,7 @@ def vectorize(texts, strings_number, dim, model):
 
 
 data['texts_norm'] = data['question'].apply(lambda x: normalize(x))
+data_s7['texts_norm'] = data_s7['question'].apply(lambda x: normalize(x))
 
 # model_1 SVD+Random Forest
 filename = 'uploads/ft_vec_SVD_RF_new.sav'
@@ -134,23 +136,39 @@ loaded_model_KNN = pickle.load(open(filename, 'rb'))
 #     return data.loc[data['answer'] == clas, 'label'].iloc[0]
 
 
-def predict_question_cosine(question, model, dim=100):
-    if request.user == 's7':
-        data = qs1
-    if model == 'embed':
-        dim = 300
-    print(f'\n\n\n\n{dim}')
-    prep = normalize(question)
-    vects_prep = vectorize(prep, 1, dim, fast_text.wv)
-    vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
-    cos_dist = cosine_distances(vects_prep, vects_ft).argsort()
+def predict_question_cosine(question, model, username=''):
+    dim = 100
+    data = read_frame(qs2, fieldnames=['question', 'answer_id', 'answer_label'])
+    data['texts_norm'] = data['question'].apply(lambda x: normalize(x))
+    if username == 's7':
+        data = data_s7
+        # data['texts_norm'] = data['question'].apply(lambda x: normalize(x))
+        prep = normalize(question)
+        vects_prep = vectorize(prep, 1, dim, fast_text.wv)
+        vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
+        cos_dist = cosine_distances(vects_prep, vects_ft).argsort()
 
-    cos_list = list(cos_dist[0][:])
-    lst = []
-    for i in cos_list:
-        lst.append(data['answer_id'].loc[data.index == i].values[0])
+        cos_list = list(cos_dist[0][:])
+        lst = []
+        for i in cos_list:
+            lst.append(data['answer_id'].loc[data.index == i].values[0])
 
-    df = pd.DataFrame(lst, columns=['cosanswer'])
-    df = df.drop_duplicates(subset='cosanswer')
+        df = pd.DataFrame(lst, columns=['cosanswer'])
+        df = df.drop_duplicates(subset='cosanswer')
 
-    return list(df['cosanswer'].values[:3])  # это список из ответов в количестве 3 шт.
+        return list(df['cosanswer'].values[:3])  # это список из ответов в количестве 3 шт.
+    else:
+        prep = normalize(question)
+        vects_prep = vectorize(prep, 1, dim, fast_text.wv)
+        vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
+        cos_dist = cosine_distances(vects_prep, vects_ft).argsort()
+
+        cos_list = list(cos_dist[0][:])
+        lst = []
+        for i in cos_list:
+            lst.append(data['answer_id'].loc[data.index == i].values[0])
+
+        df = pd.DataFrame(lst, columns=['cosanswer'])
+        df = df.drop_duplicates(subset='cosanswer')
+
+        return list(df['cosanswer'].values[:3])  # это список из ответов в количестве 3 шт.
