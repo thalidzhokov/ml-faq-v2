@@ -13,6 +13,8 @@ import random
 # import uwsgi
 import requests
 
+match_dict = {'Футбол': 31710, 'MMA': 47264, 'Шахматы': 46842, 'Хоккей': 31711, 'Теннис': 31712, 'Баскетбол': 31713, 'Волейбол': 40059, 'Бокс': 31736, 'Киберспорт': 31749, 'Гандбол': 44711, 'Снукер': 31737, 'Формула-1': 41392, 'Бейсбол': 32564, 'Олимпийские игры-2016': 31767, 'ОИ-2018': 45051, 'Биатлон': 45050, 'Другой спорт': 31738, 'Лига чемпионов': 40063, 'Лига Европы': 31726, 'РПЛ': 31716, 'АПЛ': 31714, 'Примера': 31727, 'Серия А': 31715, 'Бундеслига': 31728, 'Лига 1': 33782, 'Серия А Бразилии': 47265, 'ФНЛ': 32841, 'Кубки (нац.)': 39225, 'Другие': 31735, 'Кубок конфедераций 2017': 41175, 'Евро-2016': 31729, 'ЧМ-2014': 31778, 'Кубок Америки-2016': 35476, 'ЧМ-2018': 33571, 'ЧМ по хоккею 2018': 46004, 'КХЛ': 31730, 'НХЛ': 31731, 'МХЛ': 31774, 'ВХЛ': 31775, 'ЧМ по хоккею 2015': 32131, 'ЧМ по хоккею 2016': 35148, 'ЧМ по хоккею 2017': 40706, 'WTA': 41007, 'ATP': 41008, 'Australian Open 2018': 34011, 'Ролан Гаррос 2018': 35366, 'Уимблдон 2018': 31768, 'US Open 2018': 33138, 'НБА': 31733, 'Евролига': 31734, 'Евробаскет-2015': 33171, 'Евробаскет-2017': 36592, 'Волейбол другие': 40132, 'Суперлига России': 40060, 'Плюс-лига Польши': 40061, 'Серия А1': 40062, 'Dota 2': 39227, 'CS:GO': 39228, 'LoL': 40008, 'МЛБ': 32565}
+
 
 class QuestionsApiView(APIView):
     @classmethod
@@ -131,8 +133,9 @@ class FaqViewSet(APIView):
 
 class RandomForecastViewSet(APIView):
     def get(self, request):
+        sport_type = match_dict.get(request.data.get('sport_types'))
         url = 'https://bookmaker-ratings.ru/wp-json/bmr/v1.2/tips/posts/'
-        payload = {'filter': 'today'}
+        payload = {'filter': 'today', 'sport_types': sport_type}
         r = requests.get(url, params=payload).json().get('list')
         ids = []
         for i in r:
@@ -159,7 +162,6 @@ class CustomDataViewSet(APIView):
         model = request.data.get('model')
         dataset = request.data.get('dataset')
         result = predict_question_cosine(question, model, username)
-        print(dataset)
         return Response({
             "top_1": result[0],
             "top_2": result[1],
