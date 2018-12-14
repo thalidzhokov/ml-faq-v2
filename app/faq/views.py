@@ -133,7 +133,7 @@ class FaqViewSet(APIView):
 
 class RandomForecastViewSet(APIView):
     def get(self, request):
-        sport_type = match_dict.get(request.data.get('sport_types'))
+        sport_type = match_dict.get(request.data.get('sport_type'))
         url = 'https://bookmaker-ratings.ru/wp-json/bmr/v1.2/tips/posts/'
         payload = {'filter': 'today', 'sport_types': sport_type}
         r = requests.get(url, params=payload).json().get('list')
