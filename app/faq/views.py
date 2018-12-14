@@ -148,7 +148,7 @@ class RandomForecastViewSet(APIView):
         if len(random_forecast) > 600:
             text = text[:600]
             random_forecast = f'{title}\n{text}...Читать далее ({url})'
-        return Response({"random_forecast": random_forecast})
+        return Response({"random_forecast": random_forecast, "url": url})
 
 
 class ReloadAppViewSet(APIView):
