@@ -147,7 +147,7 @@ class RandomForecastViewSet(APIView):
         random_forecast = f'{title}\n{text}'
         if len(random_forecast) > 600:
             text = text[:600]
-            random_forecast = f'{title}\n{text}...Читать далее ({url})'
+            random_forecast = f'{title}\n{text}... '
         return Response({"random_forecast": random_forecast, "url": url})
 
 
