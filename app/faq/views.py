@@ -140,7 +140,10 @@ class RandomForecastViewSet(APIView):
         ids = []
         for i in r:
             ids.append(i.get('id'))
-        random_forecast = requests.get(f'{url}{random.choice(ids)}').json().get('content')
+        r = requests.get(f'{url}{random.choice(ids)}').json()
+        title = r.get('title')
+        text = r.get('content')
+        random_forecast = f'{title}\n{text}'
 
         return Response({"random_forecast": random_forecast})
 
