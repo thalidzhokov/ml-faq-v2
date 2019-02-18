@@ -136,7 +136,8 @@ loaded_model_KNN = pickle.load(open(filename, 'rb'))
 #     return data.loc[data['answer'] == clas, 'label'].iloc[0]
 
 
-def predict_question_cosine(question, model, username=''):
+def predict_question_cosine(question, model, username='', threshold=None):
+    print(threshold)
     dim = 100
     data = read_frame(qs2, fieldnames=['question', 'answer_id', 'answer_label'])
     data['texts_norm'] = data['question'].apply(lambda x: normalize(x))

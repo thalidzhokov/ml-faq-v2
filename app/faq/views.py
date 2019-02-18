@@ -33,7 +33,8 @@ class QuestionsApiView(APIView):
     def post(self, request):
         question = request.data.get('question')
         model = request.data.get('model')
-        result = predict_question_cosine(question, model)
+        const = request.data.get('threshold')
+        result = predict_question_cosine(question, model, const)
         return Response({
             "top_1": result[0],
             "top_2": result[1],
