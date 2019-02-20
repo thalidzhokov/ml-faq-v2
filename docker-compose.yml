@@ -13,7 +13,7 @@ services:
       volumes:
         - pgdata:/var/lib/postgresql/data/
         - ./postgres/dump:/dump
-        #- ./postgres/init:/docker-entrypoint-initdb.d
+        - ./postgres/init:/docker-entrypoint-initdb.d
 
     nginx:
         container_name: "nginx"
