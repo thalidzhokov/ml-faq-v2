@@ -3,7 +3,7 @@ from django import forms
 from .models import Rating, Answer, Question, Statistic
 from django.http import HttpResponseRedirect
 from django.views import View
-from faq.utils import predict_question_cosine
+from faq.utils import predict_question_cosine, cosine_dist
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets
@@ -27,18 +27,27 @@ class QuestionsApiView(APIView):
 
     def get(self, request):
         data = request.data
-        print(request.data)
         return Response('use the post method, please')
 
     def post(self, request):
         question = request.data.get('question')
         model = request.data.get('model')
-        const = request.data.get('threshold')
-        result = predict_question_cosine(question, model, const)
-        return Response({
-            "top_1": result[0],
-            "top_2": result[1],
-            "top_3": result[2]
+        tres = request.data.get('tres')
+        if '.' in tres:
+            tres = float(tres)
+        else:
+            tres = int(tres)
+
+        result = predict_question_cosine(question, model, tres)
+        if not isinstance(result, list):
+            return Response({
+                "Message": result
+            })
+        else:
+            return Response({
+                "top_1": result[0],
+                "top_2": result[1],
+                "top_3": result[2]
         })
 
 

@@ -12,10 +12,10 @@ from string import punctuation
 from pymorphy2 import MorphAnalyzer
 from collections import Counter
 from sklearn.metrics.pairwise import cosine_distances
-#from gensim.models import KeyedVectors
 from .models import Question, S7Question
 from django_pandas.io import read_frame
 from gensim.models import FastText
+from sklearn.metrics.pairwise import cosine_distances
 
 morph = MorphAnalyzer()
 stops = stopwords.words('russian')
@@ -110,66 +110,66 @@ filename = 'uploads/ft_vec_SVD_KNN_new.sav'
 loaded_model_KNN = pickle.load(open(filename, 'rb'))
 
 
-# def predict_question_rf(question):
-#     prep = normalize(question)
-#     print(prep, 'prep')
-#     dim = 300
-#     vects_prep = vectorize(prep, 1, dim)
-#     predicted_1 = loaded_model_RF.predict(vects_prep)
-#
-#     clas = int(data.label[predicted_1])
-#     print(clas, 'clas')
-#     #df = data['answer_id'].loc[data['answer_label'] == clas]
-#     # return data.loc[data['answer_id'] == clas, 'answer_label'].iloc[0]
-#     return data.loc[data['answer'] == clas, 'label'].iloc[0]
-#
-#
-# def predict_question_knn(question):
-#     prep = normalize(question)
-#     dim = 300
-#     vects_prep = vectorize(prep, 1, dim)
-#     predicted_2 = loaded_model_KNN.predict(vects_prep)
-#
-#     clas = int(data.label[predicted_2])
-#     #df = data['answer_id'].loc[data['answer_label'] == clas]
-#     # return data.loc[data['answer_id'] == clas, 'answer_label'].iloc[0]
-#     return data.loc[data['answer'] == clas, 'label'].iloc[0]
+def transpose(percent):
+    return percent * 0.01
 
 
-def predict_question_cosine(question, model, username='', threshold=None):
-    print(threshold)
+def treshold(num):
+    return 1.0 - num
+
+
+def cos_arg(cos_dist, dataset):
+    cos_dist = cos_dist.argsort()
+    cos_list = list(cos_dist[0][:])
+    lst = []
+    for i in cos_list:
+        lst.append(dataset['answer_id'].loc[dataset.index == i].values[0])
+
+    df = pd.DataFrame(lst, columns=['cosanswer'])
+    df = df.drop_duplicates(subset='cosanswer')
+    result = list(df['cosanswer'].values[:3])
+    return result
+
+
+def cosine_dist(vects1, vect, tres, dataset):
+    cos_dist = cosine_distances(vects1, vect)
+    if isinstance(tres, float) and 0 < tres < 1.0:
+        tres = treshold(tres)  # порог, дистанс должен быть меньше него
+        if cos_dist.min() <= tres:
+            return cos_arg(cos_dist, dataset)
+        else:
+            return 'Напишите, пожалуйста, в нашу службу поддержки (support@bookmaker-ratings.ru)'
+
+    elif isinstance(tres, int):
+        if 0 < tres < 100 and tres != 1:
+            tres = transpose(tres)
+            tres = treshold(tres)
+            if cos_dist.min() <= tres:
+                return cos_arg(cos_dist, dataset)
+            else:
+                return 'Напишите, пожалуйста, в нашу службу поддержки (support@bookmaker-ratings.ru)'
+        else:
+            return 'число не должно быть больше 100 и не должно быть равно 1 или 0'
+    else:
+        return 'введите числовое значение'
+
+def predict_question_cosine(question, model, tres, username=''):
     dim = 100
     data = read_frame(qs2, fieldnames=['question', 'answer_id', 'answer_label'])
+    data = data.reset_index(drop=True)
+    values = {'answer_id': 'В письме с уведомлением внизу есть возможность отписаться от получения уведомлений.'}
+    data = data.fillna(value=values)
     data['texts_norm'] = data['question'].apply(lambda x: normalize(x))
     if username == 's7':
         data = data_s7
-        # data['texts_norm'] = data['question'].apply(lambda x: normalize(x))
         prep = normalize(question)
         vects_prep = vectorize(prep, 1, dim, fast_text.wv)
         vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
-        cos_dist = cosine_distances(vects_prep, vects_ft).argsort()
-
-        cos_list = list(cos_dist[0][:])
-        lst = []
-        for i in cos_list:
-            lst.append(data['answer_id'].loc[data.index == i].values[0])
-
-        df = pd.DataFrame(lst, columns=['cosanswer'])
-        df = df.drop_duplicates(subset='cosanswer')
-
-        return list(df['cosanswer'].values[:3])  # это список из ответов в количестве 3 шт.
+        cos_distance = cosine_dist(vects_prep, vects_ft, tres, data)
+        return cos_distance
     else:
         prep = normalize(question)
         vects_prep = vectorize(prep, 1, dim, fast_text.wv)
         vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
-        cos_dist = cosine_distances(vects_prep, vects_ft).argsort()
-
-        cos_list = list(cos_dist[0][:])
-        lst = []
-        for i in cos_list:
-            lst.append(data['answer_id'].loc[data.index == i].values[0])
-
-        df = pd.DataFrame(lst, columns=['cosanswer'])
-        df = df.drop_duplicates(subset='cosanswer')
-
-        return list(df['cosanswer'].values[:3])  # это список из ответов в количестве 3 шт.
+        cos_distance = cosine_dist(vects_prep, vects_ft, tres, data)
+        return cos_distance
