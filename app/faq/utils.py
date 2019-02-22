@@ -160,16 +160,34 @@ def predict_question_cosine(question, model, tres, username=''):
     values = {'answer_id': 'В письме с уведомлением внизу есть возможность отписаться от получения уведомлений.'}
     data = data.fillna(value=values)
     data['texts_norm'] = data['question'].apply(lambda x: normalize(x))
-    if username == 's7':
-        data = data_s7
-        prep = normalize(question)
-        vects_prep = vectorize(prep, 1, dim, fast_text.wv)
-        vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
-        cos_distance = cosine_dist(vects_prep, vects_ft, tres, data)
-        return cos_distance
+    if not tres =='no_tres':
+        if username == 's7':
+            data = data_s7
+            prep = normalize(question)
+            vects_prep = vectorize(prep, 1, dim, fast_text.wv)
+            vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
+            cos_distance = cosine_dist(vects_prep, vects_ft, tres, data)
+            return cos_distance
+        else:
+            prep = normalize(question)
+            vects_prep = vectorize(prep, 1, dim, fast_text.wv)
+            vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
+            cos_distance = cosine_dist(vects_prep, vects_ft, tres, data)
+            return cos_distance
     else:
-        prep = normalize(question)
-        vects_prep = vectorize(prep, 1, dim, fast_text.wv)
-        vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
-        cos_distance = cosine_dist(vects_prep, vects_ft, tres, data)
-        return cos_distance
+        if username == 's7':
+            data = data_s7
+            prep = normalize(question)
+            vects_prep = vectorize(prep, 1, dim, fast_text.wv)
+            vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
+            cos_dist = cosine_distances(vects_prep, vects_ft)
+            cos_distance = cos_arg(cos_dist, data)
+
+            return cos_distance
+        else:
+            prep = normalize(question)
+            vects_prep = vectorize(prep, 1, dim, fast_text.wv)
+            vects_ft = vectorize(data['texts_norm'], len(data['texts_norm']), dim, fast_text.wv)
+            cos_dist = cosine_distances(vects_prep, vects_ft)
+            cos_distance = cos_arg(cos_dist, data)
+            return cos_distance

@@ -32,13 +32,16 @@ class QuestionsApiView(APIView):
     def post(self, request):
         question = request.data.get('question')
         model = request.data.get('model')
-        tres = request.data.get('tres')
-        if '.' in tres:
-            tres = float(tres)
-        else:
-            tres = int(tres)
+        tres = request.data.get('tres', '')
+        if tres:
+            if '.' in tres:
+                tres = float(tres)
+            else:
+                tres = int(tres)
 
-        result = predict_question_cosine(question, model, tres)
+            result = predict_question_cosine(question, model, tres)
+        else:
+            result = predict_question_cosine(question, model, tres='no_tres')
         if not isinstance(result, list):
             return Response({
                 "Message": result
